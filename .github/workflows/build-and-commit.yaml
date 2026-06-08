@@ -18,7 +18,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: main
       - name: Use Node.js 22.x
@@ -30,7 +30,7 @@ jobs:
           npm install -g corepack@0.34.0
           which yarn
       - name: Cache Node.js modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.OS }}-node-22.x-${{ hashFiles('**/yarn.lock') }}
