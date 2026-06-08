@@ -1,0 +1,51 @@
+name: Build and Commit
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'rollup.config.js'
+      - 'tsconfig.json'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - name: Prepare dependencies
+        run: |
+          npm install -g corepack@0.34.0
+          which yarn
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-node-22.x-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-22.x
+            ${{ runner.OS }}-
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Build
+        run: yarn rollup
+      - name: Commit built file
+        run: |
+          cp dist/mass-player-card.js mass-player-card.js
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add mass-player-card.js
+          git diff --staged --quiet || git commit -m "chore: update built mass-player-card.js"
+          git push
